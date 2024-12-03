@@ -3,64 +3,75 @@
 use crate::http::error_handling::AppError;
 use async_trait::async_trait;
 use axum::body::Body;
+use axum::body::Bytes;
+use axum::extract::Multipart;
 use axum::response::Response;
-use axum::Json;
 use futures::StreamExt;
-use langchain_rust::chain::Chain;
-use langchain_rust::chain::ConversationalRetrieverChainBuilder;
-use langchain_rust::document_loaders::pdf_extract_loader::PdfExtractLoader;
-use langchain_rust::document_loaders::Loader;
-use langchain_rust::embedding::OllamaEmbedder;
-use langchain_rust::fmt_message;
-use langchain_rust::fmt_template;
-use langchain_rust::llm::client::GenerationOptions;
-use langchain_rust::llm::client::Ollama;
-use langchain_rust::memory::SimpleMemory;
-use langchain_rust::message_formatter;
-use langchain_rust::prompt::HumanMessagePromptTemplate;
-use langchain_rust::prompt_args;
-use langchain_rust::schemas::Document;
-use langchain_rust::schemas::Message;
-use langchain_rust::schemas::Retriever;
-use langchain_rust::template_jinja2;
-use langchain_rust::text_splitter::TextSplitter;
-use langchain_rust::text_splitter::TextSplitterError;
-use langchain_rust::vectorstore::pgvector::StoreBuilder;
-use langchain_rust::vectorstore::VecStoreOptions;
+use futures::TryStreamExt;
+use langchain_rust::{
+    chain::{Chain, ConversationalRetrieverChainBuilder},
+    document_loaders::{pdf_extract_loader::PdfExtractLoader, Loader},
+    fmt_message, fmt_template,
+    llm::client::{GenerationOptions, Ollama},
+    memory::SimpleMemory,
+    message_formatter,
+    prompt::HumanMessagePromptTemplate,
+    prompt_args,
+    schemas::{Document, Message, Retriever},
+    template_jinja2,
+    text_splitter::{TextSplitter, TextSplitterError},
+};
 use serde::Deserialize;
 use serde::Serialize;
-use std::env;
 use std::error::Error;
-use std::path::Path;
 use text_splitter::TextSplitter as Splitter;
+use tokio::fs::{self, File};
+use tokio::io::AsyncWriteExt;
+pub async fn chat_pdf(mut multipart: Multipart) -> Result<Response, AppError> {
+    let current_dir = std::env::current_dir()?;
+    let pdf_path = current_dir.join("src/upload/file.pdf");
+    let mut file = File::create(&pdf_path).await?;
 
-pub async fn chat_pdf(Json(payload): Json<AskRequest>) -> Result<(), AppError> {
+    let mut model_value = String::new();
+    let mut question_value = String::new();
+
+    while let Some(field) = multipart.next_field().await? {
+        let name = field
+            .name()
+            .ok_or(AppError(anyhow::Error::msg("campo name não é suportado")))?
+            .to_string();
+        let data = field.bytes().await?;
+        let text = String::from_utf8(data.to_vec()).unwrap_or_default();
+        match name.as_str() {
+            "model" => {
+                if text.is_empty() {
+                    return Err(AppError(anyhow::Error::msg("model não pode estar vazio")));
+                }
+                model_value = text;
+            }
+            "question" => {
+                if text.is_empty() {
+                    return Err(AppError(anyhow::Error::msg(
+                        "question não pode estar vazio",
+                    )));
+                }
+                question_value = text;
+            }
+            "file" => {
+                if data.is_empty() {
+                    return Err(AppError(anyhow::Error::msg("file não pode estar vazio")));
+                }
+                file.write_all(&data).await?;
+            }
+            _ => {
+                return Err(AppError(anyhow::Error::msg("campo name não é suportado")));
+            }
+        }
+    }
     let options = GenerationOptions::default().temperature(0.0).num_thread(8);
-    // let ollama = OllamaEmbedder::default().with_model(payload.model);
-    // let loader = PdfExtractLoader::from_path("pops.pdf")?;
-
-    // let splitter = MyTextSplitter {};
-
-    // let documents = loader
-    //     .load_and_split(splitter)
-    //     .await
-    //     .unwrap()
-    //     .map(|d| d.unwrap())
-    //     .collect::<Vec<_>>()
-    //     .await;
-
-    // let store = StoreBuilder::new()
-    //     .embedder(ollama)
-    //     .vstore_options(VecStoreOptions::default())
-    //     .vector_dimensions(1024)
-    //     .collection_name("pops")
-    //     .connection_url("postgresql://postgres:123456@localhost:5432/postgres")
-    //     .build()
-    //     .await
-    //     .unwrap();
 
     let llm = Ollama::default()
-        .with_model(payload.model)
+        .with_model(model_value)
         .with_options(options);
 
     let prompt= message_formatter![
@@ -77,10 +88,7 @@ pub async fn chat_pdf(Json(payload): Json<AskRequest>) -> Result<(), AppError> {
                       "question"
                   )))];
 
-    let current_dir = std::env::current_dir().unwrap();
-    let pdf_path = current_dir.join("src/pops.pdf");
-
-    let pdf_retriever = PdfRetriever::new(pdf_path);
+    let pdf_retriever = PdfRetriever::new(pdf_path.clone());
 
     let chain = ConversationalRetrieverChainBuilder::new()
         .llm(llm)
@@ -93,24 +101,22 @@ pub async fn chat_pdf(Json(payload): Json<AskRequest>) -> Result<(), AppError> {
         .expect("Error building ConversationalChain");
 
     let input_variables = prompt_args! {
-        "question" => payload.question
+        "question" => question_value,
     };
 
-    let mut stream = chain.stream(input_variables).await.unwrap();
-    while let Some(result) = stream.next().await {
-        match result {
-            Ok(data) => data.to_stdout().unwrap(),
-            Err(e) => {
-                println!("Error: {:?}", e);
-            }
+    let stream = chain.stream(input_variables).await;
+    match stream {
+        Ok(stream) => {
+            let byte_stream = stream.map_ok(|data| Bytes::from(data.content.into_bytes()));
+            let stream_body = Body::from_stream(byte_stream);
+            fs::remove_file(&pdf_path).await?;
+            Ok(Response::builder().status(200).body(stream_body).unwrap())
+        }
+        Err(e) => {
+            fs::remove_file(&pdf_path).await?;
+            Err(AppError(anyhow::Error::msg(e.to_string())))
         }
     }
-    Ok(())
-    // let mut response_builder = Response::builder().status(reqwest_response.status());
-    // *response_builder.headers_mut().unwrap() = reqwest_response.headers().clone();
-    // Ok(response_builder
-    //     .body(Body::from_stream(reqwest_response.bytes_stream()))
-    //     .unwrap())
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
