@@ -1,4 +1,5 @@
 pub mod chat_handler;
+pub mod chat_pdf_handler;
 pub mod config_routes;
 pub mod delete_model_handler;
 pub mod generate_handler;
