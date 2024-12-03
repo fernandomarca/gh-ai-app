@@ -1,0 +1,4 @@
+/target
+.vscode
+sandbox/.docker/pgdata
+.history
