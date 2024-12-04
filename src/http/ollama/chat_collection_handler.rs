@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 
-use super::embedding_handler::VECTOR_DIMENSIONS;
 use crate::http::error_handling::AppError;
 use axum::Json;
 use axum::{
@@ -49,10 +48,6 @@ pub async fn chat_collection(Json(payload): Json<AskRequest>) -> Result<Response
                   )))];
 
     let ollama = OllamaEmbedder::default().with_model("mxbai-embed-large");
-    let vector_dimensions = VECTOR_DIMENSIONS
-        .get(payload.model.as_str())
-        .ok_or(AppError(anyhow::Error::msg("Modelo não suportado")))?
-        .to_owned();
 
     let store = StoreBuilder::new()
         .embedder(ollama)
