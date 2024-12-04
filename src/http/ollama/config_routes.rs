@@ -1,3 +1,4 @@
+use super::chat_collection_handler::chat_collection;
 use super::chat_handler::chat_stream;
 use super::chat_pdf_handler::chat_pdf;
 use super::delete_model_handler::delete_stream;
@@ -21,4 +22,5 @@ pub fn ollama_routes() -> Router {
         .route("/ps", get(ps))
         .route("/chat_pdf", post(chat_pdf))
         .route("/embedding_pdf", post(embedding))
+        .route("/chat_collection", post(chat_collection))
 }

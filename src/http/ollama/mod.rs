@@ -1,3 +1,4 @@
+pub mod chat_collection_handler;
 pub mod chat_handler;
 pub mod chat_pdf_handler;
 pub mod config_routes;

@@ -17,7 +17,7 @@ use text_splitter::TextSplitter as Splitter;
 use tokio::fs::File;
 use tokio::io::AsyncWriteExt;
 
-static VECTOR_DIMENSIONS: LazyLock<HashMap<&'static str, i32>> =
+pub static VECTOR_DIMENSIONS: LazyLock<HashMap<&'static str, i32>> =
     LazyLock::new(|| HashMap::from([("mxbai-embed-large", 1024), ("llama3.2", 3072)]));
 pub async fn embedding(mut multipart: Multipart) -> Result<(), AppError> {
     let current_dir = std::env::current_dir()?;
