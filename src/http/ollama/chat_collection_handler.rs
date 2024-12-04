@@ -24,6 +24,7 @@ use langchain_rust::{
 };
 use serde::Deserialize;
 use serde::Serialize;
+use serde_json::json;
 pub async fn chat_collection(Json(payload): Json<AskRequest>) -> Result<Response, AppError> {
     let options = GenerationOptions::default()
         .temperature(payload.temperature.unwrap_or(0.0))
@@ -75,7 +76,9 @@ pub async fn chat_collection(Json(payload): Json<AskRequest>) -> Result<Response
     let stream = chain.stream(input_variables).await;
     match stream {
         Ok(stream) => {
-            let byte_stream = stream.map_ok(|data| Bytes::from(data.content.into_bytes()));
+            // let byte_stream = stream.map_ok(|data| Bytes::from(data.content.into_bytes()));
+            let byte_stream = stream
+                .map_ok(|data| Bytes::from(format!("{}\n", json!({"response":data.content}))));
             let stream_body = Body::from_stream(byte_stream);
             Ok(Response::builder().status(200).body(stream_body).unwrap())
         }

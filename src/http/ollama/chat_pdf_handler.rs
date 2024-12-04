@@ -24,6 +24,7 @@ use langchain_rust::{
 };
 use serde::Deserialize;
 use serde::Serialize;
+use serde_json::json;
 use std::error::Error;
 use text_splitter::TextSplitter as Splitter;
 use tokio::fs::{self, File};
@@ -133,7 +134,8 @@ pub async fn chat_pdf(mut multipart: Multipart) -> Result<Response, AppError> {
     let stream = chain.stream(input_variables).await;
     match stream {
         Ok(stream) => {
-            let byte_stream = stream.map_ok(|data| Bytes::from(data.content.into_bytes()));
+            let byte_stream = stream
+                .map_ok(|data| Bytes::from(format!("{}\n", json!({"response":data.content}))));
             let stream_body = Body::from_stream(byte_stream);
             fs::remove_file(&pdf_path).await?;
             Ok(Response::builder().status(200).body(stream_body).unwrap())

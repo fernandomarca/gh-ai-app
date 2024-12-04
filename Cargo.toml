@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 axum = { version = "0.7.9", features = ["tracing", "macros","multipart"] }
+tower-http = {version = "0.6.2",features = ["full"]}
+http = "1.2.0"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 
