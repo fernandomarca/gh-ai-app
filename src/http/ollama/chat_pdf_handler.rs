@@ -2,10 +2,11 @@
 
 use crate::http::error_handling::AppError;
 use async_trait::async_trait;
-use axum::body::Body;
-use axum::body::Bytes;
-use axum::extract::Multipart;
-use axum::response::Response;
+use axum::{
+    body::{Body, Bytes},
+    extract::Multipart,
+    response::Response,
+};
 use futures::StreamExt;
 use futures::TryStreamExt;
 use langchain_rust::{
@@ -32,8 +33,10 @@ pub async fn chat_pdf(mut multipart: Multipart) -> Result<Response, AppError> {
     let pdf_path = current_dir.join("src/upload/file.pdf");
     let mut file = File::create(&pdf_path).await?;
 
-    let mut model_value = String::new();
-    let mut question_value = String::new();
+    let mut model = String::new();
+    let mut question = String::new();
+    let mut temperature = 0.0;
+    let mut num_thread = 4;
 
     while let Some(field) = multipart.next_field().await? {
         let name = field
@@ -47,7 +50,7 @@ pub async fn chat_pdf(mut multipart: Multipart) -> Result<Response, AppError> {
                 if text.is_empty() {
                     return Err(AppError(anyhow::Error::msg("model não pode estar vazio")));
                 }
-                model_value = text;
+                model = text;
             }
             "question" => {
                 if text.is_empty() {
@@ -55,7 +58,31 @@ pub async fn chat_pdf(mut multipart: Multipart) -> Result<Response, AppError> {
                         "question não pode estar vazio",
                     )));
                 }
-                question_value = text;
+                question = text;
+            }
+            "temperature" => {
+                if text.is_empty() {
+                    return Err(AppError(anyhow::Error::msg(
+                        "temperature não pode estar vazio",
+                    )));
+                }
+                let temperature_parse = text.parse().map_err(|_| {
+                    AppError(anyhow::Error::msg("temperature deve ser um número válido"))
+                })?;
+                temperature = temperature_parse;
+            }
+            "num_thread" => {
+                if text.is_empty() {
+                    return Err(AppError(anyhow::Error::msg(
+                        "num_thread não pode estar vazio",
+                    )));
+                }
+                let num_thread_parse = text.parse().map_err(|_| {
+                    AppError(anyhow::Error::msg(
+                        "num_thread_parse deve ser um número válido",
+                    ))
+                })?;
+                num_thread = num_thread_parse;
             }
             "file" => {
                 if data.is_empty() {
@@ -68,11 +95,11 @@ pub async fn chat_pdf(mut multipart: Multipart) -> Result<Response, AppError> {
             }
         }
     }
-    let options = GenerationOptions::default().temperature(0.0).num_thread(8);
+    let options = GenerationOptions::default()
+        .temperature(temperature)
+        .num_thread(num_thread);
 
-    let llm = Ollama::default()
-        .with_model(model_value)
-        .with_options(options);
+    let llm = Ollama::default().with_model(model).with_options(options);
 
     let prompt= message_formatter![
                   fmt_message!(Message::new_system_message("Você é um assistente útil")),
@@ -97,11 +124,10 @@ pub async fn chat_pdf(mut multipart: Multipart) -> Result<Response, AppError> {
         .memory(SimpleMemory::new().into())
         .retriever(pdf_retriever)
         .prompt(prompt)
-        .build()
-        .expect("Error building ConversationalChain");
+        .build()?;
 
     let input_variables = prompt_args! {
-        "question" => question_value,
+        "question" => question,
     };
 
     let stream = chain.stream(input_variables).await;
@@ -167,24 +193,3 @@ impl Retriever for PdfRetriever {
         Ok(documents)
     }
 }
-
-// async fn embedding(path: &str, store: Store) {
-//     let ollama = OllamaEmbedder::default().with_model("mxbai-embed-large");
-//     let loader = PdfExtractLoader::from_path(path).expect("Failed to create PdfExtractLoader");
-
-//     let splitter = MyTextSplitter {};
-
-//     let documents = loader
-//         .load_and_split(splitter)
-//         .await
-//         .unwrap()
-//         .map(|d| d.unwrap())
-//         .collect::<Vec<_>>()
-//         .await;
-
-//     for doc in &documents {
-//         let _ = add_documents!(store, &documents).await.map_err(|e| {
-//             println!("Error adding documents: {:?}", e);
-//         });
-//     }
-// }

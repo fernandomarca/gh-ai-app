@@ -23,6 +23,7 @@ pub struct GenerateRequest {
     options: Option<OptionsRequest>,
     stream: Option<bool>,
     format: Option<String>,
+    keep_alive: Option<i32>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

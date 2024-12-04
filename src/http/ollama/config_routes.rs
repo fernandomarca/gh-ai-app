@@ -1,6 +1,7 @@
 use super::chat_handler::chat_stream;
 use super::chat_pdf_handler::chat_pdf;
 use super::delete_model_handler::delete_stream;
+use super::embedding_handler::embedding;
 use super::generate_handler::generate_stream;
 use super::list_models_handler::tags;
 use super::pull_model_handler::pull_stream;
@@ -19,4 +20,5 @@ pub fn ollama_routes() -> Router {
         .route("/tags", get(tags))
         .route("/ps", get(ps))
         .route("/chat_pdf", post(chat_pdf))
+        .route("/embedding_pdf", post(embedding))
 }
