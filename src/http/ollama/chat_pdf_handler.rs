@@ -1,7 +1,9 @@
 #![allow(dead_code)]
 
+use crate::config::environment::ConfigModule;
 use crate::http::error_handling::AppError;
 use async_trait::async_trait;
+use axum::extract::State;
 use axum::{
     body::{Body, Bytes},
     extract::Multipart,
@@ -9,6 +11,7 @@ use axum::{
 };
 use futures::StreamExt;
 use futures::TryStreamExt;
+use langchain_rust::llm::client::OllamaClient;
 use langchain_rust::{
     chain::{Chain, ConversationalRetrieverChainBuilder},
     document_loaders::{pdf_extract_loader::PdfExtractLoader, Loader},
@@ -26,12 +29,17 @@ use serde::Deserialize;
 use serde::Serialize;
 use serde_json::json;
 use std::error::Error;
+use std::sync::Arc;
 use text_splitter::TextSplitter as Splitter;
 use tokio::fs::{self, File};
 use tokio::io::AsyncWriteExt;
-pub async fn chat_pdf(mut multipart: Multipart) -> Result<Response, AppError> {
+pub async fn chat_pdf(
+    State(state): State<ConfigModule>,
+    mut multipart: Multipart,
+) -> Result<Response, AppError> {
     let current_dir = std::env::current_dir()?;
-    let pdf_path = current_dir.join("src/upload/file.pdf");
+    let file_name = format!("src/upload/file-{}.pdf", uuid::Uuid::new_v4());
+    let pdf_path = current_dir.join(file_name);
     let mut file = File::create(&pdf_path).await?;
 
     let mut model = String::new();
@@ -100,7 +108,11 @@ pub async fn chat_pdf(mut multipart: Multipart) -> Result<Response, AppError> {
         .temperature(temperature)
         .num_thread(num_thread);
 
-    let llm = Ollama::default().with_model(model).with_options(options);
+    let llm_client = Arc::new(OllamaClient::new(
+        format!("http://{}", &state.ollama_server_host),
+        state.ollama_server_port.parse::<u16>()?,
+    ));
+    let llm = Ollama::new(llm_client.clone(), model, Some(options));
 
     let prompt= message_formatter![
                   fmt_message!(Message::new_system_message("Você é um assistente útil")),

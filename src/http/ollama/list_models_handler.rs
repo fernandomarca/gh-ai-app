@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use crate::config::environment::get_config_values;
 use crate::http::error_handling::AppError;
 use axum::Json;
 use serde::Deserialize;
@@ -7,8 +8,10 @@ use serde::Serialize;
 use serde_json::Value;
 
 pub async fn tags() -> Result<Json<ListResponse>, AppError> {
+    let config = get_config_values();
+
     let resp: ListResponse = reqwest::Client::new()
-        .get("http://localhost:11434/api/tags")
+        .get(format!("{}/tags", config.get_ollama_server_url()))
         .send()
         .await?
         .json()

@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+dotenvy="0.15.7"
 axum = { version = "0.7.9", features = ["tracing", "macros","multipart"] }
 tower-http = {version = "0.6.2",features = ["full"]}
 http = "1.2.0"

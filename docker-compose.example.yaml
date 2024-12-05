@@ -2,9 +2,9 @@ name: ghelere-ai
 
 services:
   app:
-    container_name: rag-app
+    container_name: rag-app-prod
     build: 
-      context: ../.
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8081:8081"

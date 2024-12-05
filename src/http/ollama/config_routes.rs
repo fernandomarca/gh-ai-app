@@ -7,12 +7,14 @@ use super::generate_handler::generate_stream;
 use super::list_models_handler::tags;
 use super::pull_model_handler::pull_stream;
 use super::running_models_handler::ps;
+use crate::config::environment::get_config_values;
 use axum::routing::delete;
 use axum::routing::get;
 use axum::routing::post;
 use axum::Router;
 
 pub fn ollama_routes() -> Router {
+    let state = get_config_values();
     Router::new()
         .route("/generate", post(generate_stream))
         .route("/chat", post(chat_stream))
@@ -23,4 +25,5 @@ pub fn ollama_routes() -> Router {
         .route("/chat_pdf", post(chat_pdf))
         .route("/embedding_pdf", post(embedding))
         .route("/chat_collection", post(chat_collection))
+        .with_state(state)
 }

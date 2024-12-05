@@ -1124,6 +1124,7 @@ dependencies = [
  "async-trait",
  "axum",
  "chrono",
+ "dotenvy",
  "futures",
  "futures-util",
  "http 1.2.0",

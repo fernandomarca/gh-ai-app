@@ -2,3 +2,5 @@
 .vscode
 sandbox/.docker/pgdata
 .history
+.env
+docker-compose.yaml

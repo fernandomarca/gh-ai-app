@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use crate::config::environment::get_config_values;
 use crate::http::error_handling::AppError;
 use axum::body::Body;
 use axum::response::Response;
@@ -44,8 +45,10 @@ pub struct GenerateResponse {
 pub async fn generate(
     Json(payload): Json<GenerateRequest>,
 ) -> Result<Json<GenerateResponse>, AppError> {
+    let config = get_config_values();
+
     let resp: GenerateResponse = reqwest::Client::new()
-        .post("http://localhost:11434/api/generate")
+        .post(format!("{}/generate", config.get_ollama_server_url()))
         .json(&payload)
         .send()
         .await?
@@ -55,8 +58,10 @@ pub async fn generate(
 }
 
 pub async fn generate_stream(Json(payload): Json<GenerateRequest>) -> Result<Response, AppError> {
+    let config = get_config_values();
+
     let reqwest_response = reqwest::Client::new()
-        .post("http://localhost:11434/api/generate")
+        .post(format!("{}/generate", config.get_ollama_server_url()))
         .json(&payload)
         .send()
         .await?;

@@ -1,6 +1,7 @@
 use http::routes::app_routes;
 use tokio::net::TcpListener;
 
+mod config;
 mod http;
 
 #[tokio::main]

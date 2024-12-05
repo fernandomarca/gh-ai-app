@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use crate::config::environment::get_config_values;
 use crate::http::error_handling::AppError;
 use axum::body::Body;
 use axum::response::Response;
@@ -13,8 +14,10 @@ pub struct DeleteRequest {
 }
 
 pub async fn delete_stream(Json(payload): Json<DeleteRequest>) -> Result<Response, AppError> {
+    let config = get_config_values();
+
     let reqwest_response = reqwest::Client::new()
-        .delete("http://localhost:11434/api/delete")
+        .delete(format!("{}/delete", config.get_ollama_server_url()))
         .json(&payload)
         .send()
         .await?;

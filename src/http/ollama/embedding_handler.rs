@@ -1,9 +1,13 @@
 #![allow(dead_code)]
 
+use crate::config::environment::get_config_values;
+use crate::config::environment::ConfigModule;
 use crate::http::error_handling::AppError;
 use async_trait::async_trait;
 use axum::extract::Multipart;
+use axum::extract::State;
 use futures::StreamExt;
+use langchain_rust::llm::client::OllamaClient;
 use langchain_rust::{
     add_documents,
     document_loaders::{pdf_extract_loader::PdfExtractLoader, Loader},
@@ -12,6 +16,7 @@ use langchain_rust::{
     vectorstore::{pgvector::StoreBuilder, VecStoreOptions, VectorStore},
 };
 use std::collections::HashMap;
+use std::sync::Arc;
 use std::sync::LazyLock;
 use text_splitter::TextSplitter as Splitter;
 use tokio::fs::File;
@@ -19,7 +24,10 @@ use tokio::io::AsyncWriteExt;
 
 pub static VECTOR_DIMENSIONS: LazyLock<HashMap<&'static str, i32>> =
     LazyLock::new(|| HashMap::from([("mxbai-embed-large", 1024), ("llama3.2", 3072)]));
-pub async fn embedding(mut multipart: Multipart) -> Result<(), AppError> {
+pub async fn embedding(
+    State(state): State<ConfigModule>,
+    mut multipart: Multipart,
+) -> Result<(), AppError> {
     let current_dir = std::env::current_dir()?;
     let pdf_path = current_dir.join("src/upload/embedding.pdf");
     let mut file = File::create(&pdf_path).await?;
@@ -61,7 +69,12 @@ pub async fn embedding(mut multipart: Multipart) -> Result<(), AppError> {
         }
     }
 
-    let ollama = OllamaEmbedder::default().with_model(&model);
+    let llm_client = Arc::new(OllamaClient::new(
+        format!("http://{}", &state.ollama_server_host),
+        state.ollama_server_port.parse::<u16>()?,
+    ));
+    let embedder = OllamaEmbedder::new(llm_client.clone(), &model, None);
+
     let loader = PdfExtractLoader::from_path(pdf_path)?;
 
     let splitter = MyTextSplitter {};
@@ -79,13 +92,15 @@ pub async fn embedding(mut multipart: Multipart) -> Result<(), AppError> {
         .ok_or(AppError(anyhow::Error::msg("Modelo não suportado")))?
         .to_owned();
 
+    let config = get_config_values();
+
     let store = StoreBuilder::new()
-        .embedder(ollama)
+        .embedder(embedder)
         .vstore_options(VecStoreOptions::default())
         .vector_dimensions(vector_dimensions)
         .pre_delete_collection(true)
         .collection_name(&collection_name)
-        .connection_url("postgresql://postgres:123456@localhost:5432/postgres")
+        .connection_url(&config.database_url)
         .build()
         .await
         .map_err(|e| AppError(anyhow::Error::msg(format!("Error building store {}", e))))?;

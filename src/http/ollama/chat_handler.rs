@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use crate::config::environment::get_config_values;
 use crate::http::error_handling::AppError;
 use axum::body::Body;
 use axum::response::Response;
@@ -9,8 +10,10 @@ use serde::Serialize;
 use serde_json::Value;
 
 pub async fn chat(Json(payload): Json<ChatRequest>) -> Result<Json<ChatResponse>, AppError> {
+    let config = get_config_values();
+
     let resp: ChatResponse = reqwest::Client::new()
-        .post("http://localhost:11434/api/chat")
+        .post(format!("{}/chat", config.get_ollama_server_url()))
         .json(&payload)
         .send()
         .await?
@@ -20,8 +23,9 @@ pub async fn chat(Json(payload): Json<ChatRequest>) -> Result<Json<ChatResponse>
 }
 
 pub async fn chat_stream(Json(payload): Json<ChatRequest>) -> Result<Response, AppError> {
+    let config = get_config_values();
     let reqwest_response = reqwest::Client::new()
-        .post("http://localhost:11434/api/chat")
+        .post(format!("{}/chat", config.get_ollama_server_url()))
         .json(&payload)
         .send()
         .await?;
