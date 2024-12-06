@@ -6,6 +6,9 @@ edition = "2021"
 [dependencies]
 dotenvy="0.15.7"
 axum = { version = "0.7.9", features = ["tracing", "macros","multipart"] }
+axum-server = { version = "0.7.1", features = ["tls-rustls"] }
+axum-extra = { version = "0.9.6"}
+rustls = "0.23.19"
 tower-http = {version = "0.6.2",features = ["full"]}
 http = "1.2.0"
 tracing = "0.1.41"

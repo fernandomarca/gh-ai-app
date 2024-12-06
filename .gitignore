@@ -4,3 +4,9 @@ sandbox/.docker/pgdata
 .history
 .env
 docker-compose.yaml
+docker-compose-prod.yaml
+docker-compose-infra.yaml
+config
+files/key.pem
+files/cert.pem
+k8s
