@@ -46,15 +46,15 @@ jobs:
         port: ${{ secrets.SERVER_PORT }}
         script: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v3
-          export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-          export DB_VENDOR=${{ secrets.DB_VENDOR }}
-          export DB_USER=${{ secrets.DB_USER }}
-          export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          export DB_HOST=${{ secrets.DB_HOST }}
-          export DB_PORT=${{ secrets.DB_PORT }}
-          export DB_NAME=${{ secrets.DB_NAME }}
-          export OLLAMA_HOST=${{ secrets.OLLAMA_HOST }}
-          export OLLAMA_PORT=${{ secrets.OLLAMA_PORT }}
+          echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> /home/ghelere/api-ghelere-ai/.env
+          echo "DB_VENDOR=${{ secrets.DB_VENDOR }}" >> /home/ghelere/api-ghelere-ai/.env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> /home/ghelere/api-ghelere-ai/.env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> /home/ghelere/api-ghelere-ai/.env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> /home/ghelere/api-ghelere-ai/.env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> /home/ghelere/api-ghelere-ai/.env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> /home/ghelere/api-ghelere-ai/.env
+          echo "OLLAMA_HOST=${{ secrets.OLLAMA_HOST }}" >> /home/ghelere/api-ghelere-ai/.env
+          echo "OLLAMA_PORT=${{ secrets.OLLAMA_PORT }}" >> /home/ghelere/api-ghelere-ai/.env
           cd /home/ghelere/api-ghelere-ai
           docker compose -f docker-compose-deploy.yaml down
           sleep 20
