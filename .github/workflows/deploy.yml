@@ -35,8 +35,7 @@ jobs:
         password: ${{ secrets.SERVER_PASSWORD }}
         port: ${{ secrets.SERVER_PORT }}
         script: |
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v3
-          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v3
+          echo ${{ secrets.SUDO_PASSWORD }} | sudo -S docker pull ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v3
           export DB_VENDOR=${{ secrets.DB_VENDOR }}
           export DB_USER=${{ secrets.DB_USER }}
           export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
@@ -45,5 +44,5 @@ jobs:
           export DB_NAME=${{ secrets.DB_NAME }}
           export OLLAMA_HOST=${{ secrets.OLLAMA_HOST }}
           export OLLAMA_PORT=${{ secrets.OLLAMA_PORT }}
-          sudo docker-compose -f docker-compose-deploy.yaml down
-          sudo docker-compose -f docker-compose-deploy.yaml up -d
+          echo ${{ secrets.SUDO_PASSWORD }} | sudo -S docker-compose -f docker-compose-deploy.yaml down
+          echo ${{ secrets.SUDO_PASSWORD }} | sudo -S docker-compose -f docker-compose-deploy.yaml up -d
