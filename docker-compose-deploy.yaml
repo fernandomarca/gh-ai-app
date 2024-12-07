@@ -3,18 +3,18 @@ name: ghelere-ai
 services:
   app:
     container_name: api-ghelere-ai
-    image: $${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v3
+    image: ${DOCKER_USERNAME}/gh-ai-api:v3
     ports:
       - "8080:8080"
     environment:
-      - DB_VENDOR=$${DB_VENDOR}
-      - DB_USER=$${DB_USER}
-      - DB_PASSWORD=$${DB_PASSWORD}
-      - DB_HOST=$${DB_HOST}
-      - DB_PORT=$${DB_PORT}
-      - DB_NAME=$${DB_NAME}
-      - OLLAMA_HOST=$${OLLAMA_HOST}
-      - OLLAMA_PORT=$${OLLAMA_PORT}
+      - DB_VENDOR=${DB_VENDOR}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - OLLAMA_HOST=${OLLAMA_HOST}
+      - OLLAMA_PORT=${OLLAMA_PORT}
     networks:
       - ghelere
 

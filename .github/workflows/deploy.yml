@@ -46,6 +46,7 @@ jobs:
         port: ${{ secrets.SERVER_PORT }}
         script: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v3
+          export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
           export DB_VENDOR=${{ secrets.DB_VENDOR }}
           export DB_USER=${{ secrets.DB_USER }}
           export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
