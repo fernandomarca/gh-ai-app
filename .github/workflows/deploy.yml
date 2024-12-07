@@ -57,4 +57,5 @@ jobs:
           export OLLAMA_PORT=${{ secrets.OLLAMA_PORT }}
           cd /home/ghelere/api-ghelere-ai
           docker compose -f docker-compose-deploy.yaml down
+          sleep 20
           docker compose -f docker-compose-deploy.yaml up -d
