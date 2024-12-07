@@ -46,6 +46,7 @@ jobs:
         port: ${{ secrets.SERVER_PORT }}
         script: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v3
+          rm -f /home/ghelere/api-ghelere-ai/.env
           echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> /home/ghelere/api-ghelere-ai/.env
           echo "DB_VENDOR=${{ secrets.DB_VENDOR }}" >> /home/ghelere/api-ghelere-ai/.env
           echo "DB_USER=${{ secrets.DB_USER }}" >> /home/ghelere/api-ghelere-ai/.env
