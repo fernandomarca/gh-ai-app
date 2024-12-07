@@ -8,4 +8,5 @@ RUN echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://p
 
 RUN apt-get update && apt-get install -y kubelet kubeadm kubectl
 RUN apt-mark hold kubelet kubeadm kubectl
-RUN systemctl enable --now kubelet
+
+CMD ["kubelet"]
