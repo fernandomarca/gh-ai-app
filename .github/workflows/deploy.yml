@@ -35,7 +35,7 @@ jobs:
         password: ${{ secrets.SERVER_PASSWORD }}
         port: ${{ secrets.SERVER_PORT }}
         source: 'docker-compose-deploy.yaml'
-        target: '/home/ghelere/api-ghelere-ai/docker-compose-deploy.yaml'
+        target: '/home/ghelere/api-ghelere-ai'
 
     - name: Deploy to server
       uses: appleboy/ssh-action@v0.1.3
