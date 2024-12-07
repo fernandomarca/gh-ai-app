@@ -6,6 +6,7 @@ services:
     image: ${DOCKER_USERNAME}/gh-ai-api:v3
     ports:
       - "8080:8080"
+      - "8444:8444"
     environment:
       - DB_VENDOR=${DB_VENDOR}
       - DB_USER=${DB_USER}

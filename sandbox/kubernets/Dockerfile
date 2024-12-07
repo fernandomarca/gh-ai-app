@@ -9,4 +9,13 @@ RUN echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://p
 RUN apt-get update && apt-get install -y kubelet kubeadm kubectl
 RUN apt-mark hold kubelet kubeadm kubectl
 
-CMD ["kubelet"]
+RUN apt-get update && apt-get install -y containerd
+
+RUN curl -LO https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.15/cri-dockerd_0.3.15.3-0.ubuntu-focal_amd64.deb \
+    && dpkg -i cri-dockerd_0.3.15.3-0.ubuntu-focal_amd64.deb \
+    && rm cri-dockerd_0.3.15.3-0.ubuntu-focal_amd64.deb
+
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
+CMD ["/usr/local/bin/start.sh"]
