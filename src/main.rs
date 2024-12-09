@@ -27,7 +27,7 @@ async fn main() {
         .expect("failed to install default provider");
     let ports = Ports {
         http: 8080,
-        https: 8444,
+        https: 2443,
     };
 
     tokio::spawn(redirect_http_to_https(ports));
