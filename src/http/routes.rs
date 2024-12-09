@@ -11,6 +11,12 @@ pub fn app_routes() -> Router {
     ];
     Router::new()
         .nest("/", health_routes())
+        .layer(
+            CorsLayer::new()
+                .allow_origin(origins.clone())
+                .allow_headers(Any)
+                .allow_methods(Any),
+        )
         .nest("/api", ollama_routes())
         .layer(
             CorsLayer::new()
