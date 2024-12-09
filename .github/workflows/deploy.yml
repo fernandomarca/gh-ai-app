@@ -24,8 +24,8 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build -t ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v3 .
-        docker push ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v3
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v5 .
+        docker push ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v5
 
     - name: Copy docker-compose file to server
       uses: appleboy/scp-action@v0.1.3
@@ -45,7 +45,7 @@ jobs:
         password: ${{ secrets.SERVER_PASSWORD }}
         port: ${{ secrets.SERVER_PORT }}
         script: |
-          docker pull ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v3
+          docker pull ${{ secrets.DOCKER_USERNAME }}/gh-ai-api:v5
           rm -f /home/ghelere/api-ghelere-ai/.env
           echo "DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}" >> /home/ghelere/api-ghelere-ai/.env
           echo "DB_VENDOR=${{ secrets.DB_VENDOR }}" >> /home/ghelere/api-ghelere-ai/.env
