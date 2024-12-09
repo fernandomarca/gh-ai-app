@@ -9,3 +9,4 @@ docker-compose-infra.yaml
 config
 k8s
 sandbox/kubernets
+nginx.conf

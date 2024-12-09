@@ -5,8 +5,7 @@ services:
     container_name: api-ghelere-ai
     image: ${DOCKER_USERNAME}/gh-ai-api:v5
     ports:
-      - "8080:8080"
-      - "2443:2443"
+      - "8081:8081"
     environment:
       - DB_VENDOR=${DB_VENDOR}
       - DB_USER=${DB_USER}
