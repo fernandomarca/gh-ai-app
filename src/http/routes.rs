@@ -4,23 +4,12 @@ use axum::Router;
 use tower_http::cors::{Any, CorsLayer};
 
 pub fn app_routes() -> Router {
-    let origins = [
-        "https://dev.oclm.com.br".parse().unwrap(),
-        "https://oclm.com.br".parse().unwrap(),
-        "http://localhost:8080".parse().unwrap(),
-    ];
     Router::new()
         .nest("/", health_routes())
-        .layer(
-            CorsLayer::new()
-                .allow_origin(origins.clone())
-                .allow_headers(Any)
-                .allow_methods(Any),
-        )
         .nest("/api", ollama_routes())
         .layer(
             CorsLayer::new()
-                .allow_origin(origins)
+                .allow_origin(Any)
                 .allow_headers(Any)
                 .allow_methods(Any),
         )

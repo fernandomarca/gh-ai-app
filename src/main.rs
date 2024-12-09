@@ -27,6 +27,7 @@ async fn main() {
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
     println!("Server running on port {}", listener.local_addr().unwrap());
     axum::serve(listener, app_routes()).await.unwrap();
+
     // default_provider()
     //     .install_default()
     //     .expect("failed to install default provider");
