@@ -23,38 +23,38 @@ struct Ports {
 
 #[tokio::main]
 async fn main() {
-    // let listener = TcpListener::bind("0.0.0.0:2443").await.unwrap();
-    // tracing::debug!("listening on {}", listener.local_addr().unwrap());
-    // println!("Server running on port {}", listener.local_addr().unwrap());
-    // axum::serve(listener, app_routes()).await.unwrap();
-    default_provider()
-        .install_default()
-        .expect("failed to install default provider");
-    let ports = Ports {
-        http: 8080,
-        https: 2443,
-    };
+    let listener = TcpListener::bind("0.0.0.0:8080").await.unwrap();
+    tracing::debug!("listening on {}", listener.local_addr().unwrap());
+    println!("Server running on port {}", listener.local_addr().unwrap());
+    axum::serve(listener, app_routes()).await.unwrap();
+    // default_provider()
+    //     .install_default()
+    //     .expect("failed to install default provider");
+    // let ports = Ports {
+    //     http: 8080,
+    //     https: 2443,
+    // };
 
-    // tokio::spawn(redirect_http_to_https(ports));
+    // // tokio::spawn(redirect_http_to_https(ports));
 
-    let config = RustlsConfig::from_pem_file(
-        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("files")
-            .join("cert.pem"),
-        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("files")
-            .join("key.pem"),
-    )
-    .await
-    .unwrap();
+    // let config = RustlsConfig::from_pem_file(
+    //     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+    //         .join("files")
+    //         .join("cert.pem"),
+    //     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+    //         .join("files")
+    //         .join("key.pem"),
+    // )
+    // .await
+    // .unwrap();
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], ports.https));
-    tracing::debug!("listening on {}", addr);
-    println!("Server running on port {}", addr);
-    axum_server::bind_rustls(addr, config)
-        .serve(app_routes().into_make_service())
-        .await
-        .unwrap();
+    // let addr = SocketAddr::from(([0, 0, 0, 0], ports.https));
+    // tracing::debug!("listening on {}", addr);
+    // println!("Server running on port {}", addr);
+    // axum_server::bind_rustls(addr, config)
+    //     .serve(app_routes().into_make_service())
+    //     .await
+    //     .unwrap();
 }
 
 #[allow(dead_code)]
