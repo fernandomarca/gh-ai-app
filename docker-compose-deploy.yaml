@@ -3,7 +3,7 @@ name: ghelere-ai
 services:
   app:
     container_name: api-ghelere-ai
-    image: ${DOCKER_USERNAME}/gh-ai-api:v5
+    image: ${DOCKER_USERNAME}/gh-ai-api:v6
     ports:
       - "8081:8081"
     environment:

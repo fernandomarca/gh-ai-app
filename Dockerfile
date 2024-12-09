@@ -22,6 +22,6 @@ COPY --from=build /app/target/release/ghelere-ai .
 
 RUN mkdir -p ./src/upload
 
-EXPOSE 8080
+# EXPOSE 8080
 
 CMD [ "./ghelere-ai" ]
