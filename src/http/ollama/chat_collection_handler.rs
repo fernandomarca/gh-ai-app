@@ -42,11 +42,16 @@ pub async fn chat_collection(
     let embedder = OllamaEmbedder::new(llm_client.clone(), "mxbai-embed-large", None);
 
     let prompt= message_formatter![
-                  fmt_message!(Message::new_system_message("Você é um assistente útil")),
+                  fmt_message!(Message::new_system_message("Você é um assistente útil sobre o assunto dos procedimentos operacionais padrão chamados de (POP) da empresa Ghelere Transportes. Você foi treinado para responder perguntas sobre o assunto e fornecer informações úteis. Se você não sabe a resposta, apenas diga que não sabe, não tente inventar uma resposta. Responda de forma clara e concisa, e não forneça informações irrelevantes. 
+                  Os documentos são referenciados e titulados como POP e o número do POP, exemplos: 'POP 001' ou 'POP001', 'POP 002' ou 'POP002', 'POP 060' ou 'POP060' e assim por diante.
+                  Use as seguintes partes do contexto para responder à pergunta no final.
+                  ")),
                   fmt_template!(HumanMessagePromptTemplate::new(
                   template_jinja2!(
                       "Use as seguintes partes do contexto para responder à pergunta no final. 
                       Se você não sabe a resposta, apenas diga que não sabe, não tente inventar uma resposta.
+                      Responda de forma clara e concisa, e não forneça informações irrelevantes.
+                      A resposta deve ser no idioma em que a pergunta foi feita.
                       {{context}}
                   
                       Pergunta: {{question}}
@@ -69,7 +74,7 @@ pub async fn chat_collection(
         .return_source_documents(true)
         .rephrase_question(true)
         .memory(SimpleMemory::new().into())
-        .retriever(Retriever::new(store, 10))
+        .retriever(Retriever::new(store, 100))
         .prompt(prompt)
         .build()
         .expect("Error building ConversationalChain");

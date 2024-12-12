@@ -114,19 +114,21 @@ pub async fn chat_pdf(
     ));
     let llm = Ollama::new(llm_client.clone(), model, Some(options));
 
-    let prompt= message_formatter![
-                  fmt_message!(Message::new_system_message("Você é um assistente útil")),
-                  fmt_template!(HumanMessagePromptTemplate::new(
-                  template_jinja2!(
-                      "Use as seguintes partes do contexto para responder à pergunta no final. 
-                      Se você não sabe a resposta, apenas diga que não sabe, não tente inventar uma resposta.
-                      {{context}}
-                  
-                      Pergunta: {{question}}
-                      Resposta útil:",
-                      "context",
-                      "question"
-                  )))];
+    let prompt = message_formatter![
+        fmt_message!(Message::new_system_message("Você é um assistente útil")),
+        fmt_template!(HumanMessagePromptTemplate::new(template_jinja2!(
+            "Use as seguintes partes do contexto para responder à pergunta no final. 
+            Se você não sabe a resposta, apenas diga que não sabe, não tente inventar uma resposta.
+            Responda de forma clara e concisa, e não forneça informações irrelevantes.
+            A resposta deve ser no idioma em que a pergunta foi feita.
+            {{context}}
+        
+            Pergunta: {{question}}
+            Resposta útil:",
+            "context",
+            "question"
+        )))
+    ];
 
     let pdf_retriever = PdfRetriever::new(pdf_path.clone());
 
