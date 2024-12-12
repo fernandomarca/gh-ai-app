@@ -4,11 +4,8 @@ use axum::extract::Host;
 use axum::handler::HandlerWithoutStateExt;
 use axum::response::Redirect;
 use axum::BoxError;
-use axum_server::tls_rustls::RustlsConfig;
 use http::routes::app_routes;
-use rustls::crypto::ring::default_provider;
 use std::net::SocketAddr;
-use std::path::PathBuf;
 use tokio::net::TcpListener;
 
 mod config;

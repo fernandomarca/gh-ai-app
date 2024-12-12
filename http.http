@@ -1,0 +1,33 @@
+GET http://localhost:8081
+
+###
+POST http://localhost:8081/api/chat_collection
+Content-Type: application/json
+
+{
+	"model": "llama3.2",
+	"question": "explique mais sobre o procedimento operacional padrão Manual Femsa ",
+	"collection": "pops",
+	"stream": false,
+	"temperature": 0.0,
+	"num_thread": 8
+}
+
+###
+POST http://localhost:8081/api/embedding_pdf
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="consolidado.pdf"
+Content-Type: application/pdf
+
+< ./consolidado.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="model"
+
+mxbai-embed-large
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="collection_name"
+
+pops
+------WebKitFormBoundary7MA4YWxkTrZu0gW--

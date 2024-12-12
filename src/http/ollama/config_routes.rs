@@ -8,6 +8,7 @@ use super::list_models_handler::tags;
 use super::pull_model_handler::pull_stream;
 use super::running_models_handler::ps;
 use crate::config::environment::get_config_values;
+use axum::extract::DefaultBodyLimit;
 use axum::routing::delete;
 use axum::routing::get;
 use axum::routing::post;
@@ -23,7 +24,9 @@ pub fn ollama_routes() -> Router {
         .route("/tags", get(tags))
         .route("/ps", get(ps))
         .route("/chat_pdf", post(chat_pdf))
+        .layer(DefaultBodyLimit::max(25 * 1024 * 1024))
         .route("/embedding_pdf", post(embedding))
+        .layer(DefaultBodyLimit::max(25 * 1024 * 1024))
         .route("/chat_collection", post(chat_collection))
         .with_state(state)
 }
