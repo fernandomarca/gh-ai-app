@@ -4,7 +4,9 @@ docker-compose exec webserver nginx -s reload
 
 docker compose run --rm  certbot certonly --webroot --webroot-path /var/www/certbot/ -d example.org
 
-docker compose run --rm certbot certonly --webroot --webroot-path /var/www/certbot/ --http-01-port=8080 --dry-run -d localhost
+docker compose run --rm certbot certonly --webroot --webroot-path /var/www/certbot/ --http-01-port=8080 --dry-run -d localhost'
+
+docker compose run --rm certbot renew
 
 curl -I http://localhost/.well-known/acme-challenge/test-file
 

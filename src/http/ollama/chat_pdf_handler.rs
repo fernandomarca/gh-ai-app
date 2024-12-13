@@ -45,7 +45,7 @@ pub async fn chat_pdf(
     let mut model = String::new();
     let mut question = String::new();
     let mut temperature = 0.0;
-    let mut num_thread = 4;
+    let mut num_thread = 16;
 
     while let Some(field) = multipart.next_field().await? {
         let name = field
